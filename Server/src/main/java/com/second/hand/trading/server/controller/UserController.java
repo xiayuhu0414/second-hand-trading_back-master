@@ -35,6 +35,9 @@ public class UserController {
     public ResultVo signIn(@RequestBody  UserModel userModel) {
         //获取当前系统时间
         userModel.setSignInTime(new Timestamp(System.currentTimeMillis()));
+        if (userModel.getAvatar() == null || "".equals(userModel.getAvatar())) {
+            userModel.setAvatar("https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png");
+        }
         if (userService.userSignIn(userModel)) {
             //返回成功通用返回对象
             return ResultVo.success(userModel);
@@ -53,9 +56,8 @@ public class UserController {
      */
     @RequestMapping("login")
     public ResultVo login(@RequestParam("accountNumber") @NotEmpty @NotNull String accountNumber,
-                          @RequestParam("userPassword") @NotEmpty @NotNull String userPassword
-                          ) {
-        //登录service层操作，进行数据库查询，返回一个用户对象
+                          @RequestParam("userPassword") @NotEmpty @NotNull String userPassword,
+                          HttpServletResponse response) {
         UserModel userModel = userService.userLogin(accountNumber, userPassword);
         if (null == userModel) {
             //返回失败通用返回对象
@@ -66,7 +68,10 @@ public class UserController {
             //返回失败通用返回对象
             return ResultVo.fail(ErrorMsg.ACCOUNT_Ban);
         }
-        //返回成功通用返回对象
+        Cookie cookie = new Cookie("shUserId", String.valueOf(userModel.getId()));
+        cookie.setPath("/");
+        cookie.setHttpOnly(false);
+        response.addCookie(cookie);
         return ResultVo.success(userModel);
     }
 
@@ -109,8 +114,10 @@ public class UserController {
      * @return
      */
     @PostMapping("/info")
-    public ResultVo updateUserPublicInfo( @RequestBody  UserModel userModel) {
-        //传入页面收集的信息，修改用户信息
+    public ResultVo updateUserPublicInfo(@CookieValue("shUserId") @NotNull(message = "登录异常 请重新登录")
+                                     @NotEmpty(message = "登录异常 请重新登录")
+                                             String id, @RequestBody  UserModel userModel) {
+        userModel.setId(Long.valueOf(id));
         if (userService.updateUserInfo(userModel)) {
             //返回成功的通用对象
             return ResultVo.success();
