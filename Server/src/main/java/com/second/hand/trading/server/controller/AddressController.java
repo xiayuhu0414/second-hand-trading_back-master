@@ -46,9 +46,9 @@ public class AddressController {
     }
 
     @PostMapping("/update")
-    public ResultVo updateAddress(@CookieValue("userId")
-                               @NotNull
-                               @NotEmpty String shUserId,
+    public ResultVo updateAddress(@CookieValue("shUserId")
+                               @NotNull(message = "登录异常 请重新登录")
+                               @NotEmpty(message = "登录异常 请重新登录") String shUserId,
                                @RequestBody AddressModel addressModel){
         //从CookieValue中获取用户id
         addressModel.setUserId(Long.valueOf(shUserId));
@@ -60,9 +60,9 @@ public class AddressController {
     }
 
     @PostMapping("/delete")
-    public ResultVo deleteAddress(@CookieValue("userId")
-                                  @NotNull
-                                  @NotEmpty String shUserId,
+    public ResultVo deleteAddress(@CookieValue("shUserId")
+                                  @NotNull(message = "登录异常 请重新登录")
+                                  @NotEmpty(message = "登录异常 请重新登录") String shUserId,
                                   @RequestBody AddressModel addressModel){
         //从CookieValue中获取用户id
         addressModel.setUserId(Long.valueOf(shUserId));
